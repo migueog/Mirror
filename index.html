@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/avgrund.js"></script>
+    <script src="js/annyang.js"></script>
+    <script src="js/script.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/avgrund.css"/>
+    <link href='http://fonts.googleapis.com/css?family=Lato:100,400' rel='stylesheet' type='text/css'>
+      <link rel="stylesheet" type="text/css" href="css/normalize.css">
+      <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+
+  </head>
+  <body>    
+    <div id="splashPage">
+        <div id="header">Good Morning Miguel</div>
+        <div id="instructions">Try saying "Morning", "Time", "Weather", "Map".<br><br>
+        To close the modals, say "Close".           </div>
+    </div>
+      
+      <div id="mainPage">
+            <aside id="timePopup" class="avgrund-popup">
+                <div id="dateDerp"></div>
+            </aside>
+
+            <aside id="weatherPopup" class="avgrund-popup">
+                <div id="forecast"></div>
+            </aside>
+          
+            <aside id="mapPopup" class="avgrund-popup">
+                <div id="sidePanel"></div>
+                <div id="bigMap" onclick="javascript:calcRoute();"></div>
+            </aside>
+          
+            <aside id="helpPopup" class="avgrund-popup">
+                <div id="header">
+                To open the Time Modal, say "Time".
+                </div>
+            </aside>
+
+            <div class="border">
+                <div id="datetime" onclick="javascript:openTime();">
+                </div>
+
+                <div id="weatherCard" onclick="javascript:openWeather();">
+                    <div id="weather"></div>
+                    <div id="city"></div>
+                </div>
+                
+                <div id="testCard" onclick="javascript:openMap();"></div>
+                
+          </div>
+        <video id="camera-stream" autoplay></video>
+      </div>
+                    
+    <script src="js/moment.js"></script>
+    <script src="js/jquery.simpleWeather.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+      
+      
+      <script>
+          
+          $(function() {
+    $('#header').animate({marginTop:"15%", opacity: 1}, 1500, 'swing');
+});
+          $(function() {
+    $('#instructions').animate({marginTop:"5%", opacity: 1}, 1500, 'swing');
+});
+              
+          
+          function name(name){
+              var fieldNameElement = document.getElementById('name');
+              fieldNameElement.innerHTML = name.toString;
+              console.log(name);
+          }
+        
+          
+          function zIndexChange(){
+                    $("#splashPage").animate({
+                        zIndex: 0,
+                        opacity: 0},
+                        500);
+          }
+          
+            function fadeSlide(id){
+              $(id.toString).animate({
+                  height: 12},
+                  500);
+            }
+                  
+          
+        function openTime(){
+            Avgrund.show("#timePopup");
+        }
+        function closeTime(){
+            Avgrund.hide();
+        }
+        function openWeather(){
+            Avgrund.show("#weatherPopup");
+        }
+        function closeWeather(){
+            Avgrund.hide();
+        }
+        function openMap(){
+            Avgrund.show('#mapPopup');
+        }
+        function closeMap(){
+            Avgrund.hide();
+        }
+        function goodbye(){
+            $("#splashPage").animate({
+                        zIndex: 1,
+                        opacity: 1},
+                        500);
+          }
+        function help(){
+            Avgrund.show('#helpPopup');
+        }
+          
+        var directionsDisplay;
+        var directionsService = new google.maps.DirectionsService();
+        var map;
+        var bigMap;
+        var home = new google.maps.LatLng(43.6757561, -79.41523);
+        var work = new google.maps.LatLng(43.7731739,-79.5051901);
+        
+          
+        function initialize(){
+            directionsDisplay = new google.maps.DirectionsRenderer();
+            var mapOptions = {
+                zoom: 16,
+                center: home
+            }
+            
+            bigMap = new google.maps.Map(document.getElementById('bigMap'), mapOptions);
+            map = new google.maps.Map(document.getElementById('testCard'), mapOptions);
+            directionsDisplay.setMap(bigMap); 
+            directionsDisplay.setPanel(document.getElementById('sidePanel'));
+        }
+          
+        function calcRoute(){
+            //var selectedMode = document.getElementById('TRANSIT').value;
+            var request = {
+                origin: home,
+                destination: work,
+                travelMode: google.maps.TravelMode['TRANSIT']
+            };
+            directionsService.route(request, function(response, status){
+                if (status == google.maps.DirectionsStatus.OK){
+                    directionsDisplay.setDirections(response);
+                }
+            });
+        }
+          
+        google.maps.event.addDomListener(window, 'load', initialize);
+    if (annyang) {
+      // Let's define a command.
+      var commands = {
+        'Time': function() { openTime()}
+      };
+        var commands2 = {
+            'close': function(){closeTime()}
+        }
+      var weatherCommand = {
+          'weather': function(){openWeather()}
+      }
+      var weatherClose = {
+          'close': function(){closeWeather()}
+      }
+      var opacityCommand = {
+          'morning': function(){zIndexChange(splashPage), fadeSlide(datetime)}
+      }
+      var mapCommand = {
+          'map': function(){openMap()}
+      }
+      var mapRoute ={
+          'direction': function(){calcRoute()}
+      }
+      var mapClose = {
+          'close': function(){closeMap()}
+      }
+      var goodbyeCommand = {
+          'bye': function(){goodbye()}
+      }
+      var helpCommand = {
+          'help': function(){help()}
+      }
+
+
+      // Add our commands to annyang
+      annyang.addCommands(commands);
+        annyang.addCommands(commands2);
+        annyang.addCommands(weatherCommand);
+        annyang.addCommands(weatherClose);
+        annyang.addCommands(opacityCommand);
+        annyang.addCommands(mapCommand);
+        annyang.addCommands(mapRoute);
+        annyang.addCommands(goodbyeCommand);
+        annyang.addCommands(helpCommand);
+      // Start listening.
+      annyang.start();
+    }
+    </script>
+    
+      
+    <script>
+        var datetime = null,
+        time = null;
+        date = null;
+        dateDerp = null;
+        
+
+        var update = function () {
+            time = moment(new Date());
+            date = moment(new Date());
+            datetime.html(time.format('h:mm:ss a'));
+            dateDerp.html(time.format('dddd, MMMM Do YYYY'));
+        };
+
+        $(document).ready(function(){
+            datetime = $('#datetime')
+            dateDerp = $('#dateDerp')
+            update();
+            setInterval(update, 1000);
+        });
+    </script>
+      
+    <script>
+    $(document).ready(function() {
+        $.simpleWeather({
+        location: 'Toronto',
+        woeid: 'woeid',
+        unit: 'c',
+        success: function(weather) {
+          html = '<div>'+weather.temp+'&deg;'+weather.units.temp+'</div>';
+          city = '<div>'+weather.city+', '+weather.region+'</div>';
+          now = '<div>'+weather.currently+'</div>';
+
+        for(var i=0;i<weather.forecast.length;i++) {
+            forecast += '<div>'+weather.forecast[i].day+': '+weather.forecast[i].high+'</div>'; 
+          }
+
+
+        $("#weather").html(html);
+        $("#city").html(city);
+        $("#now").html(now);
+        $("#forecast").html(forecast);
+        },
+        error: function(error) {
+          $("#weather").html('<p>'+error+'</p>');
+        }
+      });
+    }); 
+      </script>
+      
+      
+  </body>
+</html>
